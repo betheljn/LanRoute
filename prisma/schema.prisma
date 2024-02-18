@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  firstName  String
+  lastName   String
+  email      String   @unique
+  password   String // Note: You should encrypt passwords for security
+  createdAt  DateTime @default(now())
+  seller     Boolean?
+
+  location      String?
+  viewedProfile Int    @default(0)
+  impressions   Int    @default(0)
+
+  // Define the relationship with Post
+  post         Post[]
+  // Define the relationship with Video
+  videos       Video[]
+  // Define the relationship with Product
+  products     Product[]
+  // Define the relationship with ShoppingCart
+  shoppingCart ShoppingCart?
+  // Define the relationship with Comment
+  comments     Comment[]
+  // Define the relationship with User Profile
+  UserProfile  UserProfile[]
+  // Define the relationship with friends where the user is user1
+  friends1     Friends[]     @relation("User1Friends")
+  // Define the relationship with friends where the user is user2
+  friends2     Friends[]     @relation("User2Friends")
+  // Define the relationship with User Profile
+  likes        Like[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+}
+
+model Friends {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  user1     User     @relation("User1Friends", fields: [userId1], references: [id])
+  userId1   Int
+  user2     User     @relation("User2Friends", fields: [userId2], references: [id])
+  userId2   Int
+}
+
+model Post {
+  id             Int           @id @default(autoincrement())
+  title          String
+  content        String
+  published      Boolean
+  createdAt      DateTime      @default(now())
+  author         User          @relation(fields: [authorId], references: [id])
+  authorId       Int
+  comments       Comment[]
+  Tag            Tag?          @relation(fields: [tagId], references: [id])
+  tagId          Int?
+  likes          Like[]
+  userProfile    UserProfile[]
+  video          Video[]
+  shoppingCart   ShoppingCart? @relation(fields: [shoppingCartId], references: [id])
+  shoppingCartId Int?
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  userId    Int
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  post Post[]
+}
+
+model UserProfile {
+  id     Int    @id @default(autoincrement())
+  type   String //likes, bookmark
+  post   Post   @relation(fields: [postId], references: [id])
+  postId Int
+
+  // Define the relationship with User
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Video {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String // URL of the video
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post[]
+
+  // Define the relationship with User
+  uploader User @relation(fields: [userId], references: [id])
+  userId   Int
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  size        String
+  description String
+  price       Float
+  quantity    Int
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Define the relationship with User
+  seller   User       @relation(fields: [userId], references: [id])
+  userId   Int
+  CartItem CartItem[]
+}
+
+model ShoppingCart {
+  id        Int      @id @default(autoincrement())
+  status    String
+  totalAmount Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post[]
+
+  // Define the relationship with User
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int   @unique
+
+  // Define the relationship with CartItem
+  items CartItem[]
+}
+
+model CartItem {
+  id        Int          @id @default(autoincrement())
+  quantity  Int
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  cart      ShoppingCart @relation(fields: [cartId], references: [id])
+  cartId    Int
+}

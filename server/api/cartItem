@@ -1,0 +1,102 @@
+const express = require("express");
+const router = require("express").Router();
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const cartItemsRouter = express.Router();
+
+// Get all cartItems
+cartItemsRouter.get("/", async (req, res, next) => {
+  try {
+    const cartItem = await prisma.cartItem.findMany({
+    });
+    res.send(cartItem);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get cartItem by id
+cartItemsRouter.get("/:id", async (req, res, next) => {
+  try {
+    const cartItem = await prisma.cartItem.findFirst({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      include: {
+        product: true,
+      },
+    });
+
+    if (!cartItem) {
+      return res.status(404).send("CartItem not found.");
+    }
+
+    res.send(cartItem);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create a new Cart Item
+cartItemsRouter.post("/", async (req, res, next) => {
+  try {
+    const cartItem = await prisma.cartItem.create({
+      data: {
+        productId: req.body.productId,
+        quantity: req.body.quantity,
+        cartId: req.body.cartId,
+        userId: req.body.userId
+    },
+    });
+    res.status(201).send({ message: "Item has been created." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update a Cart Item
+cartItemsRouter.put("/:id", async (req, res, next) => {
+  console.log(req.params.id)
+  try {
+    const cartItem = await prisma.cartItem.update({
+    where: {
+        id: parseInt(req.params.id),
+    },
+      data: {
+        productId: req.body.productId,
+        quantity: req.body.quantity,
+        cartId: req.body.cartId,
+        userId: req.body.userId
+      },
+    });
+
+    if (!cartItem) {
+      return res.status(404).send("Cart Items not found.");
+    }
+
+    res.status(201).send({ message: "Item has been updated." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete a cart item by id
+cartItemsRouter.delete("/:id", async (req, res, next) => {
+  try {
+    const cartItem = await prisma.cartItem.delete({
+      where: {
+        id: parseInt(req.params.id),
+      },
+    });
+
+    if (!cartItem) {
+      return res.status(404).send("Cart Items not found.");
+    }
+
+    res.status(201).send({ message: "Item has been deleted." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = cartItemsRouter;
