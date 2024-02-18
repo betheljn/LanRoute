@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # LanRoute
 =======
 # React + Vite
