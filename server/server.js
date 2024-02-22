@@ -42,13 +42,8 @@ app.use((err, req, res, next) => {
 });
 
 // Define backend routes
-app.use("/auth", require("./api/auth"));
-app.use("/cartitem", require("./api/cartitem"))
-app.use("/comment", require("./api/comment"));
-app.use("/posts", require("./api/posts"));
-app.use("/product", require("./api/product"));
-app.use("/shoppingcart", require("./api/shoppingcart"));
-app.use("/tags", require("./api/tags"));
+app.use("/api", require("./api/auth"));
+app.use("/auth", require("./auth"))
 
 // Default to 404 if no other route matched
 app.use((req, res) => {

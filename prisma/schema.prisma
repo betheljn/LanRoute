@@ -14,6 +14,7 @@ model User {
   id         Int      @id @default(autoincrement())
   username   String   @unique
   firstName  String
+  bio        String?
   lastName   String
   email      String   @unique
   password   String // Note: You should encrypt passwords for security
@@ -22,15 +23,13 @@ model User {
   admin      Boolean  @default(false)
   image      String   @default("null")
   Vote       Vote[]
-
+  widgets    Widget[]
   location      String?
   viewedProfile Int    @default(0)
   impressions   Int    @default(0)
 
   // Define the relationship with Post
   post         Post[]
-  // Define the relationship with Video
-  videos       Video[]
   // Define the relationship with comment
   comments     Comment[]
   // Define the relationship with friends where the user is user1
@@ -39,6 +38,14 @@ model User {
   friends2     Friends[]     @relation("User2Friends")
   // Define the relationship with likes
   likes        Like[]
+}
+
+model Widget {
+  id             Int      @id @default(autoincrement())
+  type           String   // Type of the widget (e.g., "clock", "weather", "contactForm", etc.)
+  configuration  Json     // Configuration options for the widget (e.g., color, size, location, etc.)
+  userId         Int      // Foreign key reference to the User who added the widget
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 model Like {
@@ -61,7 +68,6 @@ model Friends {
 
 model Post {
   id             Int           @id @default(autoincrement())
-  title          String
   content        String
   published      Boolean
   createdAt      DateTime      @default(now())
@@ -71,7 +77,8 @@ model Post {
   Post_tag       Post_tag[]
   tagId          Int?
   likes          Like[]
-  video          Video[]
+  video          String?
+  image          String?
 }
 
 model Comment {
@@ -98,19 +105,6 @@ model Post_tag {
   tag       Tag  @relation(fields: [tagId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   tagId     Int
   commentId Int?
-}
-
-model Video {
-  id        Int      @id @default(autoincrement())
-  title     String
-  url       String // URL of the video
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  post      Post[]
-
-  // Define the relationship with User
-  uploader User @relation(fields: [userId], references: [id])
-  userId   Int
 }
 
 model Vote {
