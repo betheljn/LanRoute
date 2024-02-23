@@ -1,12 +1,15 @@
 const express = require('express');
+const commentRouter = require('./comment');
+const postRouter = require('./posts');
+const likesRouter = require('./likes');
+const tagRouter = require('./tags');
+const voteRouter = require('./vote');
 const router = express.Router();
 
-router.use("/auth", require("./auth/auth"));
-router.use("/cartitem", require("./api/cartitem"))
-router.use("/comment", require("./api/comment"));
-router.use("/posts", require("./api/posts"));
-router.use("/product", require("./api/product"));
-router.use("/shoppingcart", require("./api/shoppingcart"));
-router.use("/tags", require("./api/tags"));
+commentRouter.use("/comment", require("./comment"));
+postRouter.use("/posts", require("./posts"));
+likesRouter.use("/likes", require("./likes"));
+tagRouter.use("/tags", require("./tags"));
+voteRouter.use("/vote", require("./vote"));
 
 module.exports = router;

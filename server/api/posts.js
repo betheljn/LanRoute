@@ -1,11 +1,11 @@
-const router  = require('express').Router();
+const postRouter  = require('express').Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 // Get all posts
-router.get("/", async (req, res, next) => {
+postRouter.get("/", async (req, res, next) => {
     try {
       const post = await prisma.post.findMany();
       res.send(post);
@@ -15,7 +15,7 @@ router.get("/", async (req, res, next) => {
   });
 
 // Get posts by id
-router.get("/:id", async (req, res, next) => {
+postRouter.get("/:id", async (req, res, next) => {
     try {
       const postId = parseInt(req.params.id);
       const post = await prisma.post.findUnique({
@@ -35,14 +35,10 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // Create a new post
-router.post("/", async (req, res, next) => {
+postRouter.post("/", require('../auth/middleware'), async (req, res, next) => {
     const { title, content, published } = req.body;
     
     try {
-        const token = req.headers.authorization.split(" ")[1]; // Extract the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-        const userId = decoded.id;
-  
         // Retrieve the user data based on the user ID obtained from the token
         const user = await prisma.user.findUnique({
             where: {
@@ -73,14 +69,10 @@ router.post("/", async (req, res, next) => {
   });
 
 // Delete a post 
-router.delete("/:id", async (req, res, next) => {
+postRouter.delete("/:id", require('../auth/middleware'), async (req, res, next) => {
     const postId = parseInt(req.params.id);
   
     try {
-        const token = req.headers.authorization.split(" ")[1]; // Extract the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-        const userId = decoded.id;
-  
         // Check if the post exists and if the logged-in user is the author of the post
         const post = await prisma.post.findFirst({
             where: {
@@ -106,4 +98,4 @@ router.delete("/:id", async (req, res, next) => {
   });
 
 
-module.exports = router;
+module.exports = postRouter;

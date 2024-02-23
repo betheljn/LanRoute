@@ -19,7 +19,6 @@ model User {
   email      String   @unique
   password   String // Note: You should encrypt passwords for security
   createdAt  DateTime @default(now())
-  seller     Boolean?
   admin      Boolean  @default(false)
   image      String   @default("null")
   Vote       Vote[]

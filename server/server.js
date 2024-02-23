@@ -21,20 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 // Static file-serving middleware
 app.use(express.static(path.join(__dirname, "..", "client/dist")));
 
-// Middleware to check for JWT token and attach user ID to request
-app.use((req, res, next) => {
-  const auth = req.headers.authorization;
-  const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
-
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET, { expiresIn: "2h" }); // Assuming you have JWT_SECRET defined in your environment variables
-  } catch {
-    req.user = null;
-  }
-
-  next();
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -42,8 +28,8 @@ app.use((err, req, res, next) => {
 });
 
 // Define backend routes
-app.use("/api", require("./api/auth"));
-app.use("/auth", require("./auth"))
+app.use("/api", require("./api"));
+app.use("/auth", require("./auth/auth"))
 
 // Default to 404 if no other route matched
 app.use((req, res) => {

@@ -17,7 +17,6 @@ router.post("/register", async (req, res, next) => {
               lastName,
               username,
               email,
-              seller,
               password: hashedPassword
           }
       });
@@ -64,7 +63,9 @@ router.post("/login", async (req, res, next) => {
 
 // Get the currently logged in user
 router.get("/me", async (req, res, next) => {
-    console.log( req.user.id)
+  if(!req.user){
+    return res.send({})
+  }
     try {
       const user = await prisma.user.findUnique({
         where: {
@@ -78,18 +79,14 @@ router.get("/me", async (req, res, next) => {
   });
 
 // Update a user
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", require('./middleware'), async (req, res, next) => {
     try {
-      const { username, password, email, firstName, lastName, seller, } = req.body;
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
       const user = await prisma.user.update({
         data: {  
             firstName,
             lastName,
             username,
             email,
-            seller,
             password: hashedPassword
       },
         where: {

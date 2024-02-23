@@ -1,55 +1,49 @@
 const express = require('express');
-const voteRouter = express.Router();
+const likesRouter = express.Router();
 const {PrismaClient} = require("@prisma/client");
 const prisma = new PrismaClient();
 
-voteRouter.post('/', require('../auth/middleware'), async (req, res, next) => {
+likesRouter.post('/', require('../auth/middleware'), async (req, res, next) => {
 
     try{
-        const exist = await prisma.vote.findFirst({
+        const exist = await prisma.like.findFirst({
             where:{
                 userId:  Number(req.user.id),
-                commentId:  Number(req.body.commentId),
+                postId:  Number(req.body.postId),
             }
         })
 
         if(exist){
 
-            await prisma.vote.delete({
+            await prisma.like.delete({
                 where: {
                     id: exist.id,
                     userId:  Number(req.user.id),
-                    commentId:  Number(req.body.commentId),
+                    postId:  Number(req.body.postId),
                 }
             });
             if(exist.type!==req.body.type){
-                await prisma.vote.create({
+                await prisma.like.create({
                     data: {
                         userId:  Number(req.user.id),
-                        commentId:  Number(req.body.commentId),
+                        postId:  Number(req.body.postId),
                         type: req.body.type
                     }
                 });
             }
         }else{
-            await prisma.vote.create({
+            await prisma.like.create({
                 data: {
                     userId:  Number(req.user.id),
-                    commentId:  Number(req.body.commentId),
+                    postId:  Number(req.body.postId),
                     type: req.body.type
                 }
             });
         }
 
-        const comment =  await prisma.comment.findFirst({
-            where:{
-                id:req.body.commentId
-            }
-        })
-
         const finalPost = await prisma.post.findFirst({
             where: {
-                id: comment.postId
+                id: req.body.postId
             },
             include: {
                 post_tag: {
@@ -75,4 +69,4 @@ voteRouter.post('/', require('../auth/middleware'), async (req, res, next) => {
     }
 })
 
-module.exports = voteRouter;
+module.exports = likesRouter;
